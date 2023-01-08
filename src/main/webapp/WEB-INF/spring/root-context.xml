@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+    xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+        http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+			<!-- Root Context: defines shared resources visible to all other web components -->
+	<context:property-placeholder location="classpath:config/mybatis/db.properties" />
+
+
+	<bean id="dataSourceRef" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>
+
+	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+	<constructor-arg ref="dataSourceRef" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="SQL         :  " />
+			</bean>
+		</property>
+	</bean>
+
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:config/mybatis/mybatis-config.xml"/>
+		<!-- <property name="mapperLocations" value="classpath:config/mybatis/mapper/**/*.xml"></property> -->
+	</bean>
+		
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+		
+		
+		
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- multipartResolver -->
+	<bean name="multipartResolver"
+	      class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	    <property name="defaultEncoding" value="utf-8"/>
+	    <property name="maxUploadSize"   value="104857600"/>
+	</bean>
+	
+		<!-- Spring 과 json과의  연동 설정 -->   
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+	    <property name="messageConverters">
+	    <!-- new ArrayList()  -->
+	    <list>    
+	        <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+	            <property name="supportedMediaTypes">
+	                <list>
+	                    <value>text/html;charset=UTF-8</value>
+	                    <value>application/json;charset=UTF-8</value>
+	                </list>
+	            </property>
+	        </bean>            
+	    </list>
+	    </property>                        
+	</bean>    	
+
+		
+		
+</beans>

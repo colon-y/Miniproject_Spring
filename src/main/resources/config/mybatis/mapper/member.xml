@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">
+   
+  <!-- 전체조회  -->
+  <select id="member_list" resultType="com.ict.minispring.vo.MemberVo">
+     select * from member  WHERE m_delete ='show' order by m_idx
+  </select>
+  
+  <!-- m_idx 1건조회 -->
+  <select id="member_one_m_idx"  parameterType="int" resultType="com.ict.minispring.vo.MemberVo">
+     select * from member where m_idx=#{ m_idx }
+  </select>
+  
+  <!-- m_id 1건조회 -->
+  <select id="member_one_m_id"  parameterType="java.lang.String" resultType="com.ict.minispring.vo.MemberVo">
+     select * from member where m_id=#{ m_id }
+  </select>
+
+  <!-- insert -->
+  <insert id="member_insert"  parameterType="com.ict.minispring.vo.MemberVo">
+  
+
+  
+     insert into member 
+     	(M_IDX, M_NAME, M_ID, M_PWD, M_NICKNAME, M_GRADE, M_IP, M_REGDATE, M_ADDR, M_ZIPCODE ,M_DELETE)
+     values(seq_member_m_idx.nextVal,
+			                              #{ m_name },
+			                              #{ m_id },
+			                              #{ m_pwd },
+			                              #{ m_nickname },
+			                              #{ m_grade },
+			                              #{ m_ip },
+			                              sysdate,			                           
+			                              #{ m_addr },
+			                              #{ m_zipcode },
+			                              'show'
+			                              )
+  </insert>
+  
+  <!-- delete -->
+  <delete id="member_delete" parameterType="int">
+     delete from member where m_idx=#{ m_idx }
+  </delete>
+  
+   <update id="delete_hide" parameterType="int">
+     update  member set  m_delete ='hide'  where m_idx=#{ m_idx }
+  </update>
+
+  <!-- update -->
+  <update id="member_update" parameterType="com.ict.minispring.vo.MemberVo">
+      update member 
+             set m_name=#{ m_name },
+                 m_id=#{ m_id },
+                 m_pwd=#{ m_pwd },
+                 m_nickname=#{ m_nickname },
+                 <if test="m_grade!=null">
+                 	m_grade=#{ m_grade },
+                 </if>
+                 
+                 m_ip=#{ m_ip },
+                 m_regdate=sysdate,
+                 m_zipcode=#{ m_zipcode },
+                 m_addr=#{ m_addr }
+      where m_idx=#{ m_idx }
+  </update>
+
+  <select id="check_id"  parameterType="java.lang.String" resultType="com.ict.minispring.vo.MemberVo">
+     select * from member where M_ID=#{ m_id }
+  </select>
+
+  <select id="check_nickname"  parameterType="java.lang.String" resultType="com.ict.minispring.vo.MemberVo">
+     select * from member where M_NICKNAME=#{ m_nickname }
+  </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

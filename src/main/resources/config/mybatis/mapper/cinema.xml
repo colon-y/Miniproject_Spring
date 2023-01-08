@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cinema">
+
+	<select id="getTotCount" resultType="int">
+	 select count(c_idx) from cinema
+	</select>
+
+	<!-- 조회 -->
+    <select id="cinema_list" resultType="com.ict.minispring.vo.CinemaVo">
+    	SELECT * FROM 
+             (
+              SELECT  rownum as rn , A.* ,
+              
+              (SELECT count(*) FROM  REVIEW r WHERE C_idx=a.c_idx) AS review_cnt
+              
+              FROM
+               
+             ( SELECT * FROM cinema ORDER BY c_idx DESC ) A 
+                
+              )   
+           where rn BETWEEN  #{pageBegin} AND #{pageEnd}
+    </select>
+    
+  
+    
+    <!-- c_idx에 해당되는 1건 데이터 -->
+	<select id="cinema_one" parameterType="int" resultType="com.ict.minispring.vo.CinemaVo">
+		select * from cinema where c_idx=#{ c_idx }
+	</select>
+
+	<!-- 추가 -->
+	<insert id="cinema_insert" parameterType="com.ict.minispring.vo.CinemaVo">
+		insert into cinema values(seq_cinema_c_idx.nextVal,
+		                                     #{ c_category },
+		                                     #{ c_subject },
+		                                     #{ c_info },
+		                                     #{ c_filename },
+		                                     sysdate
+		                                     )
+	
+	</insert>
+	
+	<!-- 삭제 -->
+	<delete id="cinema_delete" parameterType="int">
+		delete from cinema where c_idx=#{ c_idx }
+	</delete>
+	
+	<!-- 수정 -->
+	<update id="cinema_update" parameterType="com.ict.minispring.vo.CinemaVo">
+		update cinema
+			set c_category=#{ c_category },
+			    c_subject =#{ c_subject },
+			    c_info    =#{ c_info },			 
+			    c_regdate =sysdate
+			    where c_idx=#{ c_idx }
+	</update>
+	
+	<!-- 사진 이름 수정 -->
+	<update id="cinema_update_filename" parameterType="com.ict.minispring.vo.CinemaVo">
+		update cinema set c_filename=#{ c_filename }
+		where c_idx=#{ c_idx }
+	</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

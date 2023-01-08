@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="review">
+
+	<sql id="search">
+	    <if test="search !=null and search_text != null and !search_text.equals('') and !search_text.equals('null') ">
+	            <if test="search == 'subject'.toString()">
+	                and R_SUBJECT like '%' || #{search_text} || '%'
+	            </if>	     
+	            <if test="search == 'name'.toString()">
+	                and M_NAME like '%' || #{search_text} || '%'
+	            </if>	     
+	            <if test="search == 'content'.toString()">
+	                and R_CONTENT like  '%' || #{search_text} || '%'
+	            </if>	 
+	            <if test="search == 'name_content'.toString()">
+	                and ( 
+	                     M_NAME like '%' || #{search_text} || '%'  
+	                    OR
+	                     R_CONTENT like '%' ||  #{search_text} || '%'	                   
+	                )
+	            </if>	                        
+	            <if test="search == 'all'.toString() ">
+	                and ( 
+	                     R_SUBJECT like '%' || #{search_text} || '%'  
+	                    OR
+	                     M_NAME like '%' ||  #{search_text} || '%'
+	                    OR
+	                     R_CONTENT like '%' || #{search_text} || '%'
+	                )
+	            </if>	             
+	    </if>
+	</sql>
+
+	<!-- 전체조회 -->
+	<select id="review_list" resultType="com.ict.minispring.vo.ReviewVo">
+		select * from (
+			select rownum as rn , A.* FROM
+			(
+
+			SELECT r.*, m.M_NAME , m.M_NICKNAME , m.M_GRADE , m.M_DELETE   FROM review r				
+			INNER JOIN "MEMBER" m on r.m_idx=m.M_IDX
+			WHERE c_idx=#{c_idx} 
+			
+			<include refid="search" />
+			
+			order by r_idx DESC
+	
+			) A
+
+		) where rn BETWEEN #{start} and #{end}
+	</select>
+
+
+	<select id="select_row_total" resultType="int">
+		select count(r.r_idx) from review r
+			INNER JOIN "MEMBER" m on r.m_idx=m.M_IDX
+			
+		WHERE c_idx=#{c_idx} 			
+			<include refid="search" />	
+	</select>
+
+
+	<!-- 페이징처리 조회 -->
+
+
+
+	<!-- r_idx에 해당되는 게시물 1건 -->
+	<select id="review_one" parameterType="int"
+		resultType="com.ict.minispring.vo.ReviewVo">
+		select * from review where r_idx=#{ r_idx }
+	</select>
+
+
+
+	<!-- 새글쓰기 -->
+	<insert id="review_insert"
+		parameterType="com.ict.minispring.vo.ReviewVo">
+		insert into review values(
+		seq_review_r_idx.nextVal,
+		#{ r_subject },
+		#{ r_content },
+		sysdate,
+		#{ r_score },
+		0,
+		#{ m_idx },
+		#{ c_idx }
+		)
+	</insert>
+
+
+
+
+	<!-- 조회수 증가 -->
+	<update id="review_count" parameterType="int">
+		update review
+		set r_count = r_count + 1
+		where r_idx=#{ r_idx }
+	</update>
+
+	<!-- 삭제 -->
+	<delete id="review_delete" >
+		DELETE FROM review WHERE r_idx=#{r_idx} 
+	</delete>
+
+	<!-- 수정 -->
+	<update id="review_update" parameterType="com.ict.minispring.vo.ReviewVo">
+		update review 
+			set r_subject=#{r_subject},
+			r_content=#{r_content},
+			R_SCORE =#{r_score}
+		
+		where r_idx=#{ r_idx } and m_idx =#{m_idx}
+	</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
